@@ -29,8 +29,8 @@ const handleDisconnect = function () {
  * Handle a user joining a room
  *
  */
-const handleUserJoined = async function (room_id, callback) {
-	debug(`User with socket id ${this.id} wants to join room '${room_id}'`);
+const handleUserJoined = async function (username, room_id, callback) {
+	debug(`User ${username} with socket id ${this.id} wants to join room '${room_id}'`);
 
 	// join room
 	this.join(room_id);
@@ -50,7 +50,7 @@ const handleUserJoined = async function (room_id, callback) {
 	const room = getRoomById(room_id)
 
 	// add socket to room's `users` object
-	room.users[this.id] = "Player"
+	room.users[this.id] = username
 
 	// confirm join
 	callback({
