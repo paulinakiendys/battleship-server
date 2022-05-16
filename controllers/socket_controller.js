@@ -5,6 +5,18 @@
 const debug = require('debug')('game:socket_controller');
 let io = null; // socket.io server instance
 
+const rooms = []
+
+/**
+ * Get room by ID
+ *
+ * @param {String} id ID of Room to get
+ * @returns
+ */
+const getRoomById = id => {
+	return rooms.find(room => room.id === id)
+}
+
 /**
  * Handle a user disconnecting
  * 
@@ -17,14 +29,39 @@ const handleDisconnect = function () {
  * Handle a user joining a room
  *
  */
- const handleUserJoined = async function(room_id, callback) {
+const handleUserJoined = async function (room_id, callback) {
 	debug(`User with socket id ${this.id} wants to join room '${room_id}'`);
+
+	// join room
+	this.join(room_id);
+
+	// create a object for the new room
+	const newRoom = {
+		id: room_id,
+		users: {}
+	}
+
+	// add room to array of rooms
+	rooms.push(newRoom)
+
+	// add socket to list of online users in this room
+
+	// find room object with `id` === room_id
+	const room = getRoomById(room_id)
+
+	// add socket to room's `users` object
+	room.users[this.id] = "Player"
 
 	// confirm join
 	callback({
 		success: true,
+		room: room.id,
+		users: room.users,
 	});
- }
+
+	// broadcast list of users to everyone in the room
+	io.to(room.id).emit('user:list', room.users);
+}
 
 /**
  * Export controller and attach handlers to events
