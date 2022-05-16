@@ -14,6 +14,19 @@ const handleDisconnect = function () {
 }
 
 /**
+ * Handle a user joining a room
+ *
+ */
+ const handleUserJoined = async function(room_id, callback) {
+	debug(`User with socket id ${this.id} wants to join room '${room_id}'`);
+
+	// confirm join
+	callback({
+		success: true,
+	});
+ }
+
+/**
  * Export controller and attach handlers to events
  *
  */
@@ -26,4 +39,6 @@ module.exports = function (socket, _io) {
 	// handle user disconnect
 	socket.on('disconnect', handleDisconnect)
 
+	// handle user joined
+	socket.on('user:joined', handleUserJoined)
 }
