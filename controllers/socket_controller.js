@@ -2,12 +2,18 @@
  * Socket Controller
  */
 
-const debug = require('debug')('game:socket_controller');
+const debug = require('debug')('game:socket_controller')
+const { v4: uuidv4 } = require('uuid')
 let io = null; // socket.io server instance
 
+// list of rooms and their users
 const rooms = []
 
-// demo comment
+// a defined room_id means that a room already exists
+let room_id = ''
+
+// status 'toggler' for if an opponent is waiting
+let waitingStatus = true
 
 /**
  * Get room by ID
@@ -28,41 +34,73 @@ const handleDisconnect = function () {
 }
 
 /**
- * Handle a user joining a room
+ * Handle a user requesting to join a room
  *
  */
-const handleUserJoined = async function (username, room_id, callback) {
-	debug(`User ${username} with socket id ${this.id} wants to join room '${room_id}'`);
+const handleUserJoin = function (username, callback) {
+	debug(`User ${username} with socket id ${this.id} wants to join a room`)
 
-	// join room
-	this.join(room_id);
+	// check if room id is defined
+	if (!room_id) {
 
-	// create a object for the new room
-	const newRoom = {
-		id: room_id,
-		users: {}
+		// if not, create uuid
+		const uuid = uuidv4() // '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d'
+		
+		// set room id to uuid
+		room_id = uuid
+
+		// create a new room object
+		const room = {
+			id: room_id,
+			users: [],
+			/**
+			 * @todo Tirapat: add room data here if necessary
+			 */
+		};
+		// add the new room to list of rooms
+		rooms.push(room);
+	} else {
+		// if room id is defined, the opponent is no longer waiting
+		waitingStatus = false;
 	}
-
-	// add room to array of rooms
-	rooms.push(newRoom)
-
-	// add socket to list of online users in this room
 
 	// find room object with `id` === room_id
 	const room = getRoomById(room_id)
 
-	// add socket to room's `users` object
-	room.users[this.id] = username
+	// join room
+	this.join(room.id)
+
+	// create a user object
+	const user = {
+		id: this.id,
+		username: username,
+		/**
+		 * @todo Tirapat: add user data here if necessary
+		 */
+	}
+
+	// add user to the room
+	room.users.push(user)
 
 	// confirm join
 	callback({
-		success: true,
-		room: room.id,
-		users: room.users,
-	});
+		waitingStatus,
+		room_id: room.id,
+	})
 
-	// broadcast list of users to everyone in the room
-	io.to(room.id).emit('user:list', room.users);
+	// check if user needs to wait for an opponent
+	if (!waitingStatus) {
+		// if not, emit  to the first user that a second user is ready
+		this.broadcast.to(room.id).emit('user:ready', room.id)
+
+		// reset variables
+		waiting = true
+		roomName = ''
+	}
+}
+
+const handleUsersReady = () => {
+	debug(`Both users are ready to start the game`)
 }
 
 /**
@@ -78,6 +116,9 @@ module.exports = function (socket, _io) {
 	// handle user disconnect
 	socket.on('disconnect', handleDisconnect)
 
-	// handle user joined
-	socket.on('user:joined', handleUserJoined)
+	// handle user join request
+	socket.on('user:join', handleUserJoin)
+
+	// handle both users ready to start the game
+	socket.on('users:ready', handleUsersReady)
 }
