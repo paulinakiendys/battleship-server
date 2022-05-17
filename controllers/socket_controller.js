@@ -13,7 +13,7 @@ const rooms = []
 let room_id = ''
 
 // status 'toggler' for if an opponent is waiting
-let waitingStatus = true
+let waiting = true
 
 /**
  * Get room by ID
@@ -44,7 +44,7 @@ const handleUserJoin = function (username, callback) {
 	if (!room_id) {
 
 		// if not, create uuid
-		const uuid = uuidv4() // '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d'
+		const uuid = uuidv4() // eg. '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d'
 		
 		// set room id to uuid
 		room_id = uuid
@@ -58,10 +58,10 @@ const handleUserJoin = function (username, callback) {
 			 */
 		};
 		// add the new room to list of rooms
-		rooms.push(room);
+		rooms.push(room)
 	} else {
 		// if room id is defined, the opponent is no longer waiting
-		waitingStatus = false;
+		waiting = false
 	}
 
 	// find room object with `id` === room_id
@@ -84,18 +84,18 @@ const handleUserJoin = function (username, callback) {
 
 	// confirm join
 	callback({
-		waitingStatus,
+		waiting,
 		room_id: room.id,
 	})
 
 	// check if user needs to wait for an opponent
-	if (!waitingStatus) {
+	if (!waiting) {
 		// if not, emit  to the first user that a second user is ready
 		this.broadcast.to(room.id).emit('user:ready', room.id)
 
 		// reset variables
 		waiting = true
-		roomName = ''
+		room_id = ''
 	}
 }
 
