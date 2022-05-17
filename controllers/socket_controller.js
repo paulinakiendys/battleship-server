@@ -7,8 +7,6 @@ let io = null; // socket.io server instance
 
 const rooms = []
 
-// demo comment
-
 /**
  * Get room by ID
  *
