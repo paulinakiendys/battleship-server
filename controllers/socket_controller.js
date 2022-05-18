@@ -26,11 +26,33 @@ const getRoomById = id => {
 }
 
 /**
+ * Get room by User ID
+ *
+ * @param {String} id Socket ID of User to get Room by
+ * @returns
+ */
+ const getRoomByUserId = id => {
+	return rooms.find(room => room.users.find(user => user.id === id));
+}
+
+/**
  * Handle a user disconnecting
  * 
  */
 const handleDisconnect = function () {
-	debug(`Client ${this.id} disconnected`)
+
+	const room = getRoomByUserId(this.id)
+
+	// if client was not in a room, don't do anything
+	if (!room) {
+		debug(`Client ${this.id} disconnected`)
+		return
+	}
+
+	debug(`Client ${this.id} disconnected from room ${room.id}`)
+
+	// let user know that opponent left the game
+	this.broadcast.to(room.id).emit('user:disconnected')
 }
 
 /**
