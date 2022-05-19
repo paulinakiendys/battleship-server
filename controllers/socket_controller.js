@@ -125,6 +125,14 @@ const handleUsersReady = () => {
 	debug(`Both users are ready to start the game`)
 }
 
+const handleChatMessage = function(messageObject) {
+	debug(`${messageObject.timestamp}: Someone said: "${messageObject.content}"`)
+
+	const room = getRoomById(messageObject.room)
+
+	io.to(room.id).emit('chat:incoming', messageObject)
+}
+
 /**
  * Export controller and attach handlers to events
  *
@@ -143,4 +151,7 @@ module.exports = function (socket, _io) {
 
 	// handle both users ready to start the game
 	socket.on('users:ready', handleUsersReady)
+
+	// handle chat message
+	socket.on('chat:message', handleChatMessage)
 }
