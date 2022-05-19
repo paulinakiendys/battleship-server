@@ -73,5 +73,5 @@ function onError(error) {
  */
 function onListening() {
 	const addr = server.address();
-	console.log(`Listening on port ${addr.port}`);
+	debug(`Listening on port ${addr.port}`);
 }
