@@ -31,7 +31,7 @@ const getRoomById = id => {
  * @param {String} id Socket ID of User to get Room by
  * @returns
  */
- const getRoomByUserId = id => {
+const getRoomByUserId = id => {
 	return rooms.find(room => room.users.find(user => user.id === id));
 }
 
@@ -51,8 +51,16 @@ const handleDisconnect = function () {
 
 	debug(`Client ${this.id} disconnected from room ${room.id}`)
 
-	// let user know that opponent left the game
-	this.broadcast.to(room.id).emit('user:disconnected')
+	// send message to client
+	// 1. construct message object
+	const messageObject = {
+		timestamp: Date.now(),
+		content: "Your opponent left the battle 😥",
+	}
+
+	// 2. broadcast message to client
+	this.broadcast.to(room.id).emit('user:disconnected', messageObject)
+
 }
 
 /**
@@ -67,7 +75,7 @@ const handleUserJoin = function (username, callback) {
 
 		// if not, create uuid
 		const uuid = uuidv4() // eg. '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d'
-		
+
 		// set room id to uuid
 		room_id = uuid
 
@@ -125,7 +133,7 @@ const handleUsersReady = () => {
 	debug(`Both users are ready to start the game`)
 }
 
-const handleChatMessage = function(messageObject) {
+const handleChatMessage = (messageObject) => {
 	debug(`${messageObject.timestamp}: Someone said: "${messageObject.content}"`)
 
 	const room = getRoomById(messageObject.room)
