@@ -129,8 +129,18 @@ const handleUserJoin = function (username, callback) {
 	}
 }
 
-const handleUsersReady = () => {
-	debug(`Both users are ready to start the game`)
+const handleUsersReady = async function (room_id) {
+	debug(`Both users have joined a room`)
+
+	// find room object with `id` === room_id
+	const room = getRoomById(room_id)
+
+	// get both users' usernames
+	const userOne = room.users[0].username
+	const userTwo = room.users[1].username
+
+	// emit usernames to room
+	io.to(room.id).emit('users:usernames', userOne, userTwo)
 }
 
 const handleChatMessage = (messageObject) => {
