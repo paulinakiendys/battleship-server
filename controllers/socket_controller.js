@@ -54,6 +54,7 @@ const handleDisconnect = function () {
 	// send message to client
 	// 1. construct message object
 	const messageObject = {
+		username: "server",
 		timestamp: Date.now(),
 		content: "Your opponent left the battle 😥",
 	}
@@ -141,10 +142,21 @@ const handleUsersReady = async function (room_id) {
 
 	// emit usernames to room
 	io.to(room.id).emit('users:usernames', userOne, userTwo)
+
+	// send instructions
+	// 1. construct message object
+	const messageObject = {
+		username: "server",
+		timestamp: Date.now(),
+		content: "Press 'Randomize' to change ship positions. Press 'Ready' to start.",
+	}
+
+	// 2. emit instructions to everyone in the room
+	io.to(room.id).emit('log:instructions', messageObject)
 }
 
 const handleChatMessage = (messageObject) => {
-	debug(`${messageObject.timestamp}: Someone said: "${messageObject.content}"`)
+	debug(`${messageObject.timestamp}: ${messageObject.username} said: "${messageObject.content}"`)
 
 	const room = getRoomById(messageObject.room)
 
