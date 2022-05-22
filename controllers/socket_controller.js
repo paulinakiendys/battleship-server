@@ -84,6 +84,7 @@ const handleUserJoin = function (username, callback) {
 		const room = {
 			id: room_id,
 			users: [],
+			ready: false, // status toggler to be used when positioning ships
 			/**
 			 * @todo Tirapat: add room data here if necessary
 			 */
@@ -164,6 +165,62 @@ const handleChatMessage = (messageObject) => {
 }
 
 /**
+ * 
+ * Handle a user requesting to start the game
+ */
+const handleGameStart = function (callback) {
+	debug(`Client with socket id: ${this.id} is ready to start the game`)
+
+	// find room
+	const room = getRoomByUserId(this.id)
+
+	// confirm game start
+	callback({
+		room, // default value of room.ready is 'false'
+	})
+
+	// create message object
+	const messageObject = {
+		username: "server",
+		timestamp: Date.now(),
+		content: "Waiting for opponent to place ships...",
+	}
+
+	// send waiting message to client
+	io.to(this.id).emit('log:waiting', messageObject)
+
+	// toggle 'ready' status
+	room.ready = true
+}
+
+/**
+ * 
+ * Handle both users having positioned their ships
+ */
+const handleShipsReady = (room_id) => {
+	debug(`Both users have now placed their ships`)
+
+	// get room
+	const room = getRoomById(room_id)
+
+	// get list of users in room
+	const users = room.users
+
+	// get random user
+	const randomUser = users[Math.floor(Math.random() * users.length)];
+
+	// create message object
+	const messageObject = {
+		username: "server",
+		timestamp: Date.now(),
+		content: `Let the battle begin! ${randomUser.username} goes first. Fire! 💣`,
+	}
+
+	// emit message with starting player to everyone in the room
+	io.to(room_id).emit('log:startingPlayer', messageObject)
+}
+
+/**
  * Export controller and attach handlers to events
  *
  */
@@ -179,9 +236,15 @@ module.exports = function (socket, _io) {
 	// handle user join request
 	socket.on('user:join', handleUserJoin)
 
-	// handle both users ready to start the game
+	// handle both users having joined a room
 	socket.on('users:ready', handleUsersReady)
 
 	// handle chat message
 	socket.on('chat:message', handleChatMessage)
+
+	// handle user ready to start the game
+	socket.on('game:start', handleGameStart)
+
+	// handle both users having positioned their ships
+	socket.on('ships:ready', handleShipsReady)
 }
