@@ -131,7 +131,7 @@ const handleUserJoin = function (username, callback) {
 }
 
 const handleUsersReady = async function (room_id) {
-	debug(`Both users have joined a room`)
+	debug(`Both users have joined a room with id ${room_id}`)
 
 	// find room object with `id` === room_id
 	const room = getRoomById(room_id)
