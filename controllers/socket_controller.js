@@ -35,6 +35,7 @@ const getRoomByUserId = id => {
 	return rooms.find(room => room.users.find(user => user.id === id));
 }
 
+
 /**
  * Handle a user disconnecting
  * 
@@ -109,6 +110,7 @@ const handleUserJoin = function (username, callback) {
 		/**
 		 * @todo Tirapat: add user data here if necessary
 		 */
+		ships: []
 	}
 
 	// add user to the room
@@ -168,11 +170,24 @@ const handleChatMessage = (messageObject) => {
  * 
  * Handle a user requesting to start the game
  */
-const handleGameStart = function (callback) {
+const handleGameStart = function (userShips, callback) {
 	debug(`Client with socket id: ${this.id} is ready to start the game`)
 
 	// find room
 	const room = getRoomByUserId(this.id)
+
+	//Add the ships to the user
+	const users = room.users 
+
+	const getUserById = id => {
+		return users.find(user => user.id === id)
+	}
+
+	const user = getUserById(this.id)
+
+	user.ships.push.apply(user.ships, userShips)
+
+	console.log("This should be user: ", user)
 
 	// confirm game start
 	callback({
@@ -220,6 +235,66 @@ const handleShipsReady = (room_id) => {
 	io.to(room_id).emit('log:startingPlayer', messageObject)
 }
 
+
+
+//** HANDLE THE ACTUAL GAMING */
+
+/**
+ * Handle fire
+ *
+ */
+
+const handleFire = (shotFired, room_id, gameUsername) => {
+
+	// get room
+	const room = getRoomById(room_id)
+
+	// get list of users in room
+	const users = room.users
+
+	console.log("Users:", users)
+
+	const user = users.find(user => user.username == gameUsername)
+
+	const opponent = users.find(user => user.username != gameUsername)
+	
+	console.log("IS THIS OPPONENT? ", opponent)
+
+	console.log(shotFired)
+
+	//Check to see if it was a hit
+	opponent.ships.forEach((ship, index) => {
+		if(ship.position.includes(shotFired)) {
+			console.log("YOU GOT A HIT")
+
+			//remove the hitten position from ships position-array
+			ship.position.splice(index, 1)
+		} else {
+			console.log("MISS")
+		}
+
+		console.log(ship.position)
+	})
+	
+	const messageObject = {
+		username: "server",
+		timestamp: Date.now(),
+		content: `Nice shot! ${gameUsername} fired on ${shotFired} 💣`
+	}
+
+	//const userShipsLeft = user.ships.length
+
+	//console.log("Userships left: ", userShipsLeft)
+
+	// emit message with starting player to everyone in the room
+	io.to(room_id).emit('log:fire', messageObject)
+
+	// emit updated length of shipsarray
+	//io.to(room_id).emit('ships:length', userShipsLeft) 
+}
+
+
+
 /**
  * Export controller and attach handlers to events
  *
@@ -244,6 +319,9 @@ module.exports = function (socket, _io) {
 
 	// handle user ready to start the game
 	socket.on('game:start', handleGameStart)
+
+	// handle fire
+	socket.on('user:fire', handleFire)
 
 	// handle both users having positioned their ships
 	socket.on('ships:ready', handleShipsReady)
