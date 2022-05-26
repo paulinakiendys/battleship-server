@@ -271,12 +271,12 @@ const handleFire = (shotFired, room_id, gameUsername) => {
 	console.log(shotFired)
 
 	//Check to see if it was a hit
-	opponent.ships.forEach((ship, index) => {
+	opponent.ships.forEach((ship) => {
 		if(ship.position.includes(shotFired)) {
 			console.log("YOU GOT A HIT")
 
-			//remove the hitten position from ships position-array
-			ship.position.splice(index, 1)
+			//Find the indexOf shotFired and remove that from position array.
+			ship.position.splice(ship.position.indexOf(shotFired), 1)
 		} else {
 			console.log("MISS")
 		}
