@@ -204,6 +204,12 @@ const handleGameStart = function (userShips, callback) {
 	// send waiting message to client
 	io.to(this.id).emit('log:waiting', messageObject)
 
+	//save user's ships
+	const userShipList = user.ships
+
+	// send userShipList to client
+	io.to(this.id).emit('user:ships', userShipList)
+
 	// toggle 'ready' status
 	room.ready = true
 }
@@ -254,8 +260,10 @@ const handleFire = (shotFired, room_id, gameUsername) => {
 
 	console.log("Users:", users)
 
+	//find user
 	const user = users.find(user => user.username == gameUsername)
 
+	//find opponent
 	const opponent = users.find(user => user.username != gameUsername)
 	
 	console.log("IS THIS OPPONENT? ", opponent)
@@ -283,7 +291,6 @@ const handleFire = (shotFired, room_id, gameUsername) => {
 	}
 
 	//const userShipsLeft = user.ships.length
-
 	//console.log("Userships left: ", userShipsLeft)
 
 	// emit message with starting player to everyone in the room
