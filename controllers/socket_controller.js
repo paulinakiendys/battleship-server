@@ -274,9 +274,16 @@ const handleFire = (shotFired, room_id, gameUsername) => {
 	opponent.ships.forEach((ship) => {
 		if(ship.position.includes(shotFired)) {
 			console.log("YOU GOT A HIT")
-
 			//Find the indexOf shotFired and remove that from position array.
 			ship.position.splice(ship.position.indexOf(shotFired), 1)
+			
+			// If the ship position array is empty then give sunk true
+			if(ship.position.length === 0) {
+				console.log("Ship sunk")
+				ship.sunk = true
+				console.log(opponent)
+			}
+
 		} else {
 			console.log("MISS")
 		}
