@@ -239,6 +239,9 @@ const handleShipsReady = (room_id) => {
 
 	// emit message with starting player to everyone in the room
 	io.to(room_id).emit('log:startingPlayer', messageObject)
+
+	// emit who's turn it is
+	io.to(room_id).emit('user:firstTurn', randomUser)
 }
 
 
@@ -287,14 +290,14 @@ const handleFire = (shotFired, room_id, gameUsername) => {
 	const messageObject = {
 		username: "server",
 		timestamp: Date.now(),
-		content: `Nice shot! ${gameUsername} fired on ${shotFired} 💣`
+		content: `${gameUsername} fired on ${shotFired} 💣`
 	}
 
 	//const userShipsLeft = user.ships.length
 	//console.log("Userships left: ", userShipsLeft)
 
 	// emit message with starting player to everyone in the room
-	io.to(room_id).emit('log:fire', messageObject)
+	io.to(room_id).emit('log:fire', messageObject, user)
 
 	// emit updated length of shipsarray
 	//io.to(room_id).emit('ships:length', userShipsLeft) 
