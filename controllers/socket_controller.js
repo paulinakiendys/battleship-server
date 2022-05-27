@@ -274,11 +274,12 @@ const handleFire = (shotFired, room_id, gameUsername) => {
 	opponent.ships.forEach((ship) => {
 		if(ship.position.includes(shotFired)) {
 			console.log("YOU GOT A HIT")
+
 			//Find the indexOf shotFired and remove that from position array.
 			ship.position.splice(ship.position.indexOf(shotFired), 1)
 			
 			// If the ship position array is empty then give sunk true
-			if(ship.position.length === 0) {
+			if(!ship.position.length) {
 				console.log("Ship sunk")
 				ship.sunk = true
 				console.log(opponent)
@@ -287,27 +288,83 @@ const handleFire = (shotFired, room_id, gameUsername) => {
 		} else {
 			console.log("MISS")
 		}
-
 		console.log(ship.position)
 	})
+
+	// Send to client
+	const userShipsLeft = user.ships.filter((ship) => {
+		return ship.sunk == false
+	})
+	console.log("userShipsLeft", userShipsLeft.length)
+
+	// Send to client
+	const opponentsShipsLeft = opponent.ships.filter((ship) => {
+		return ship.sunk == false
+	})
+	console.log("opponentsShipsLeft", opponentsShipsLeft.length)
+
+
+	const ShipsLeft = opponent.ships.filter((ship) => {
+		return ship.sunk == false
+	})
+
 	
 	const messageObject = {
 		username: "server",
 		timestamp: Date.now(),
-		content: `Nice shot! ${gameUsername} fired on ${shotFired} 💣`
+		content: `${gameUsername} fired on ${shotFired}💣 | ${opponent.username} has ${ShipsLeft.length} ships left!`
 	}
 
-	//const userShipsLeft = user.ships.length
-	//console.log("Userships left: ", userShipsLeft)
+	// @Kolla på, ska man inte använda socket.broadcast? Annars skickar den 2 gånger.
 
 	// emit message with starting player to everyone in the room
 	io.to(room_id).emit('log:fire', messageObject)
 
 	// emit updated length of shipsarray
-	//io.to(room_id).emit('ships:length', userShipsLeft) 
+	io.to(room_id).emit('ships:left', userShipsLeft, opponentsShipsLeft) 
 }
 
+const handleResults = (room_id, gameUsername) => {
+	// get room
+	const room = getRoomById(room_id)
 
+	// get list of users in room
+	const users = room.users
+
+	console.log("Users:", users)
+
+	//find user
+	const user = users.find(user => user.username == gameUsername)
+
+	//find opponent
+	const opponent = users.find(user => user.username != gameUsername)
+
+	const userShipsSunk = user.ships.filter((ship) => {
+		return ship.sunk == true
+	})
+
+	const opponentsShipsSunk = opponent.ships.filter((ship) => {
+		return ship.sunk == true
+	})
+
+	const winner = ""
+
+	if(userShipsSunk.length === 4 ) {
+		console.log(`${user.username} lost`)
+		winner = opponent.username
+	} else if(opponentsShipsSunk.length === 4) {
+		console.log(`${opponentsShipsSunk.length} lost`)
+		winner = user.username
+	}
+		
+	const messageObject = {
+		username: "server",
+		timestamp: Date.now(),
+		content: `${winner} has won!`
+	}
+
+	io.to(room_id).emit('log:results', messageObject)
+}
 
 /**
  * Export controller and attach handlers to events
@@ -339,4 +396,7 @@ module.exports = function (socket, _io) {
 
 	// handle both users having positioned their ships
 	socket.on('ships:ready', handleShipsReady)
+
+	// handle gameResults
+	socket.on('game:results', handleResults)
 }
