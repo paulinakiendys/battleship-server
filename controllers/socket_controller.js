@@ -55,9 +55,9 @@ const handleDisconnect = function () {
 	// send message to client
 	// 1. construct message object
 	const messageObject = {
-		username: "server",
+		username: "😥",
 		timestamp: Date.now(),
-		content: "Your opponent left the battle 😥",
+		content: "Your opponent left the battle",
 	}
 
 	// 2. broadcast message to client
@@ -149,9 +149,9 @@ const handleUsersReady = async function (room_id) {
 	// send instructions
 	// 1. construct message object
 	const messageObject = {
-		username: "server",
+		username: "ℹ",
 		timestamp: Date.now(),
-		content: "Press 'Randomize' to change ship positions. Press 'Ready' to start.",
+		content: "Press 'Ready' to start.",
 	}
 
 	// 2. emit instructions to everyone in the room
@@ -177,7 +177,7 @@ const handleGameStart = function (userShips, callback) {
 	const room = getRoomByUserId(this.id)
 
 	//Add the ships to the user
-	const users = room.users 
+	const users = room.users
 
 	const getUserById = id => {
 		return users.find(user => user.id === id)
@@ -196,9 +196,9 @@ const handleGameStart = function (userShips, callback) {
 
 	// create message object
 	const messageObject = {
-		username: "server",
+		username: "⏱",
 		timestamp: Date.now(),
-		content: "Waiting for opponent to place ships...",
+		content: "Waiting for opponent...",
 	}
 
 	// send waiting message to client
@@ -232,13 +232,16 @@ const handleShipsReady = (room_id) => {
 
 	// create message object
 	const messageObject = {
-		username: "server",
+		username: " 💣",
 		timestamp: Date.now(),
-		content: `Let the battle begin! ${randomUser.username} goes first. Fire! 💣`,
+		content: `Let the battle begin! ${randomUser.username} goes first. Fire!`,
 	}
 
 	// emit message with starting player to everyone in the room
 	io.to(room_id).emit('log:startingPlayer', messageObject)
+
+	// emit who's turn it is
+	io.to(room_id).emit('user:firstTurn', randomUser)
 }
 
 
@@ -265,19 +268,19 @@ const handleFire = (shotFired, room_id, gameUsername) => {
 
 	//find opponent
 	const opponent = users.find(user => user.username != gameUsername)
-	
+
 	console.log("IS THIS OPPONENT? ", opponent)
 
 	console.log(shotFired)
 
 	//Check to see if it was a hit
 	opponent.ships.forEach((ship) => {
-		if(ship.position.includes(shotFired)) {
+		if (ship.position.includes(shotFired)) {
 			console.log("YOU GOT A HIT")
 
 			//Find the indexOf shotFired and remove that from position array.
 			ship.position.splice(ship.position.indexOf(shotFired), 1)
-			
+
 			// If the ship position array is empty then give sunk true
 			if(!ship.position.length) {
 				console.log("Ship sunk")
@@ -318,7 +321,7 @@ const handleFire = (shotFired, room_id, gameUsername) => {
 	// @Kolla på, ska man inte använda socket.broadcast? Annars skickar den 2 gånger.
 
 	// emit message with starting player to everyone in the room
-	io.to(room_id).emit('log:fire', messageObject)
+	io.to(room_id).emit('log:fire', messageObject, user)
 
 	// emit updated length of shipsarray
 	io.to(room_id).emit('ships:left', userShipsLeft, opponentsShipsLeft) 
