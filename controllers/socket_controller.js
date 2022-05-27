@@ -326,7 +326,7 @@ const handleFire = (shotFired, room_id, gameUsername) => {
 	// emit updated length of shipsarray
 	io.to(room_id).emit('ships:left', userShipsLeft, opponentsShipsLeft) 
 }
-
+// GameResults
 const handleResults = (room_id, gameUsername) => {
 	// get room
 	const room = getRoomById(room_id)
