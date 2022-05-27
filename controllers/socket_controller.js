@@ -242,6 +242,7 @@ const handleShipsReady = (room_id) => {
 
 	// emit who's turn it is
 	io.to(room_id).emit('user:firstTurn', randomUser)
+	
 }
 
 
@@ -318,13 +319,23 @@ const handleFire = (shotFired, room_id, gameUsername) => {
 		content: `${gameUsername} fired on ${shotFired}💣 | ${opponent.username} has ${ShipsLeft.length} ships left!`
 	}
 
-	// @Kolla på, ska man inte använda socket.broadcast? Annars skickar den 2 gånger.
+	let winner = ""
+
+	if(userShipsLeft.length === 0) {
+		winner = opponent.username
+		console.log(`${winner} wins`)
+	} else if(opponentsShipsLeft.length === 0) {
+		winner = gameUsername
+		console.log(`${winner} wins`)
+	} 
 
 	// emit message with starting player to everyone in the room
 	io.to(room_id).emit('log:fire', messageObject, user)
 
 	// emit updated length of shipsarray
 	io.to(room_id).emit('ships:left', userShipsLeft, opponentsShipsLeft) 
+
+	io.to(room_id).emit('winner', winner)
 }
 // GameResults
 const handleResults = (room_id, gameUsername) => {
@@ -350,7 +361,7 @@ const handleResults = (room_id, gameUsername) => {
 		return ship.sunk == true
 	})
 
-	const winner = ""
+	/* const winner = ""
 
 	if(userShipsSunk.length === 4 ) {
 		console.log(`${user.username} lost`)
@@ -358,7 +369,7 @@ const handleResults = (room_id, gameUsername) => {
 	} else if(opponentsShipsSunk.length === 4) {
 		console.log(`${opponentsShipsSunk.length} lost`)
 		winner = user.username
-	}
+	} */
 		
 	const messageObject = {
 		username: "server",
