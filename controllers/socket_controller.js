@@ -187,7 +187,7 @@ const handleGameStart = function (userShips, callback) {
 
 	user.ships.push.apply(user.ships, userShips)
 
-	console.log("This should be user: ", user)
+	// console.log("This should be user: ", user)
 
 	// confirm game start
 	callback({
@@ -267,8 +267,20 @@ const handleFire = (shotFired, room_id, gameUsername) => {
 	//find user
 	const user = users.find(user => user.username == gameUsername)
 
+	// OBS!!! Ta bort båda console.loggarna när ni testat att koden funkar :)
+
+	console.log(user.username)
+	user.ships.forEach(ship => {
+		console.log(ship.position)
+	});
+
 	//find opponent
 	const opponent = users.find(user => user.username != gameUsername)
+
+	console.log(opponent.username)
+	opponent.ships.forEach(ship => {
+		console.log(ship.position)
+	});
 
 	// console.log("IS THIS OPPONENT? ", opponent)
 
@@ -316,7 +328,7 @@ const handleFire = (shotFired, room_id, gameUsername) => {
 	const messageObject = {
 		username: "server",
 		timestamp: Date.now(),
-		content: `${gameUsername} fired on ${shotFired}💣 | ${opponent.username} has ${ShipsLeft.length} ships left!`
+		content: `${gameUsername} fired on ${shotFired}💣`
 	}
 
 	let winner = ""
