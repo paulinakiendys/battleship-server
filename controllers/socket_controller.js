@@ -262,7 +262,7 @@ const handleFire = (shotFired, room_id, gameUsername) => {
 	// get list of users in room
 	const users = room.users
 
-	console.log("Users:", users)
+	// console.log("Users:", users)
 
 	//find user
 	const user = users.find(user => user.username == gameUsername)
@@ -270,42 +270,42 @@ const handleFire = (shotFired, room_id, gameUsername) => {
 	//find opponent
 	const opponent = users.find(user => user.username != gameUsername)
 
-	console.log("IS THIS OPPONENT? ", opponent)
+	// console.log("IS THIS OPPONENT? ", opponent)
 
-	console.log(shotFired)
+	// console.log(shotFired)
 
 	//Check to see if it was a hit
 	opponent.ships.forEach((ship) => {
 		if (ship.position.includes(shotFired)) {
-			console.log("YOU GOT A HIT")
+			// console.log("YOU GOT A HIT")
 
 			//Find the indexOf shotFired and remove that from position array.
 			ship.position.splice(ship.position.indexOf(shotFired), 1)
 
 			// If the ship position array is empty then give sunk true
 			if(!ship.position.length) {
-				console.log("Ship sunk")
+				// console.log("Ship sunk")
 				ship.sunk = true
-				console.log(opponent)
+				// console.log(opponent)
 			}
 
 		} else {
-			console.log("MISS")
+			// console.log("MISS")
 		}
-		console.log(ship.position)
+		// console.log(ship.position)
 	})
 
 	// Send to client
 	const userShipsLeft = user.ships.filter((ship) => {
 		return ship.sunk == false
 	})
-	console.log("userShipsLeft", userShipsLeft.length)
+	// console.log("userShipsLeft", userShipsLeft.length)
 
 	// Send to client
 	const opponentsShipsLeft = opponent.ships.filter((ship) => {
 		return ship.sunk == false
 	})
-	console.log("opponentsShipsLeft", opponentsShipsLeft.length)
+	// console.log("opponentsShipsLeft", opponentsShipsLeft.length)
 
 
 	const ShipsLeft = opponent.ships.filter((ship) => {
@@ -323,17 +323,17 @@ const handleFire = (shotFired, room_id, gameUsername) => {
 
 	if(userShipsLeft.length === 0) {
 		winner = opponent.username
-		console.log(`${winner} wins`)
+		// console.log(`${winner} wins`)
 	} else if(opponentsShipsLeft.length === 0) {
 		winner = gameUsername
-		console.log(`${winner} wins`)
+		// console.log(`${winner} wins`)
 	} 
 
 	// emit message with starting player to everyone in the room
 	io.to(room_id).emit('log:fire', messageObject, user)
 
-	// emit updated length of shipsarray
-	io.to(room_id).emit('ships:left', userShipsLeft, opponentsShipsLeft) 
+	// emit updated ship status
+	io.to(room_id).emit('ships:status', userShipsLeft, user.id, opponentsShipsLeft, opponent.id)
 
 	io.to(room_id).emit('winner', winner)
 }
