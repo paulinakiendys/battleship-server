@@ -228,21 +228,10 @@ const handleShipsReady = (room_id) => {
 	const users = room.users
 
 	// get random user
-	const randomUser = users[Math.floor(Math.random() * users.length)];
-
-	// create message object
-	const messageObject = {
-		username: " 💣",
-		timestamp: Date.now(),
-		content: `Let the battle begin! ${randomUser.username} goes first. Fire!`,
-	}
-
-	// emit message with starting player to everyone in the room
-	io.to(room_id).emit('log:startingPlayer', messageObject)
+	const randomUser = users[Math.floor(Math.random() * users.length)]
 
 	// emit who's turn it is
 	io.to(room_id).emit('user:firstTurn', randomUser)
-	
 }
 
 
@@ -295,7 +284,7 @@ const handleFire = (shotFired, room_id, gameUsername) => {
 			ship.position.splice(ship.position.indexOf(shotFired), 1)
 
 			// If the ship position array is empty then give sunk true
-			if(!ship.position.length) {
+			if (!ship.position.length) {
 				// console.log("Ship sunk")
 				ship.sunk = true
 				// console.log(opponent)
@@ -324,7 +313,7 @@ const handleFire = (shotFired, room_id, gameUsername) => {
 		return ship.sunk == false
 	})
 
-	
+
 	const messageObject = {
 		username: "server",
 		timestamp: Date.now(),
@@ -333,13 +322,13 @@ const handleFire = (shotFired, room_id, gameUsername) => {
 
 	let winner = ""
 
-	if(userShipsLeft.length === 0) {
+	if (userShipsLeft.length === 0) {
 		winner = opponent.username
 		// console.log(`${winner} wins`)
-	} else if(opponentsShipsLeft.length === 0) {
+	} else if (opponentsShipsLeft.length === 0) {
 		winner = gameUsername
 		// console.log(`${winner} wins`)
-	} 
+	}
 
 	// emit message with starting player to everyone in the room
 	io.to(room_id).emit('log:fire', messageObject, user)
@@ -374,7 +363,7 @@ const handleResults = (room_id, gameUsername) => {
 	})
 
 	/* const winner = ""
-
+ 
 	if(userShipsSunk.length === 4 ) {
 		console.log(`${user.username} lost`)
 		winner = opponent.username
@@ -382,7 +371,7 @@ const handleResults = (room_id, gameUsername) => {
 		console.log(`${opponentsShipsSunk.length} lost`)
 		winner = user.username
 	} */
-		
+
 	const messageObject = {
 		username: "server",
 		timestamp: Date.now(),
