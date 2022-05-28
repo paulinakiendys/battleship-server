@@ -294,7 +294,8 @@ const handleFire = (shotFired, room_id, gameUsername) => {
 			}
 
 		} else {
-			// console.log("MISS")
+			// Emit 'miss' event to room in order to style both boards
+			io.to(room_id).emit('miss', gameUsername, shotFired)
 		}
 		// console.log(ship.position)
 	})
