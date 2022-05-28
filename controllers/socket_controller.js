@@ -280,6 +280,9 @@ const handleFire = (shotFired, room_id, gameUsername) => {
 		if (ship.position.includes(shotFired)) {
 			// console.log("YOU GOT A HIT")
 
+			// Emit 'hit' event to room in order to style both boards
+			io.to(room_id).emit('hit', gameUsername, shotFired)
+
 			//Find the indexOf shotFired and remove that from position array.
 			ship.position.splice(ship.position.indexOf(shotFired), 1)
 
