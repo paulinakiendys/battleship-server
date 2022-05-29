@@ -151,7 +151,7 @@ const handleUsersReady = async function (room_id) {
 	const messageObject = {
 		username: "ℹ",
 		timestamp: Date.now(),
-		content: "Press 'Ready' to start.",
+		content: "Press 'Generate ships' to place your ships. When your opponent is ready, a random player will be chosen to start the game.",
 	}
 
 	// 2. emit instructions to everyone in the room
