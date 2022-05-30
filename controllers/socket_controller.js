@@ -275,6 +275,9 @@ const handleFire = (shotFired, room_id, gameUsername) => {
 
 	// console.log(shotFired)
 
+	// hit is initially set to false
+	let hit = false
+
 	//Check to see if it was a hit
 	opponent.ships.forEach((ship) => {
 		if (ship.position.includes(shotFired)) {
@@ -282,6 +285,9 @@ const handleFire = (shotFired, room_id, gameUsername) => {
 
 			//Find the indexOf shotFired and remove that from position array.
 			ship.position.splice(ship.position.indexOf(shotFired), 1)
+
+			// set hit to true
+			hit = true
 
 			// If the ship position array is empty then give sunk true
 			if (!ship.position.length) {
@@ -332,6 +338,9 @@ const handleFire = (shotFired, room_id, gameUsername) => {
 
 	// emit message with starting player to everyone in the room
 	io.to(room_id).emit('log:fire', messageObject, user)
+
+	// emit if we have a 'hit' or a 'miss'
+	io.to(room_id).emit('fire:incoming', hit, gameUsername, shotFired)
 
 	// emit updated ship status
 	io.to(room_id).emit('ships:status', userShipsLeft, user.id, opponentsShipsLeft, opponent.id)
