@@ -1,5 +1,5 @@
 {
-  "name": "13-game-server",
+  "name": "game-server",
   "version": "0.1.0",
   "private": true,
   "main": "server.js",
